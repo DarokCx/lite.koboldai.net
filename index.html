@@ -5716,6 +5716,7 @@ Current version indicated by LITEVER below.
 			new_save_storyobj.savedsettings.saved_openrouter_key = "";
 			new_save_storyobj.savedsettings.saved_palm_key = "";
 			new_save_storyobj.savedsettings.saved_cohere_key = "";
+			new_save_storyobj.savedsettings.saved_featherless_key = "";
 
 			new_save_storyobj.savedsettings.modelhashes = [];
 
@@ -6047,6 +6048,7 @@ Current version indicated by LITEVER below.
 					let tmp_claude2 = localsettings.saved_claude_addr;
 					let tmp_palm1 = localsettings.saved_palm_key;
 					let tmp_cohere1 = localsettings.saved_cohere_key;
+					let tmp_featherless1 = localsettings.saved_featherless_key;
 					let tmp_kai = localsettings.saved_kai_addr;
 					let tmp_kai2 = localsettings.saved_kai_key;
 					let tmp_a1111 = localsettings.saved_a1111_url;
@@ -6082,6 +6084,7 @@ Current version indicated by LITEVER below.
 					localsettings.saved_claude_addr = tmp_claude2;
 					localsettings.saved_palm_key = tmp_palm1;
 					localsettings.saved_cohere_key = tmp_cohere1;
+					localsettings.saved_featherless_key = tmp_featherless1;
 					localsettings.saved_kai_addr = tmp_kai;
 					localsettings.saved_kai_key = tmp_kai2;
 					localsettings.saved_a1111_url = tmp_a1111;
@@ -8008,6 +8011,7 @@ Current version indicated by LITEVER below.
 		document.getElementById("custom_openrouter_model").classList.add("hidden");
 		document.getElementById("hordeloadmodelcontainer").classList.add("hidden");
 		document.getElementById("coherecustom").classList.add("hidden");
+		document.getElementById("featherlesscustom").classList.add("hidden");
 
 		if(epchoice==0)
 		{
@@ -8083,6 +8087,13 @@ Current version indicated by LITEVER below.
 			document.getElementById("cohere_preamble").value = localsettings.saved_cohere_preamble;
 			togglecoherepreamble();
 		}
+		else if(epchoice==7)
+		{
+			document.getElementById("featherlesscustom").classList.remove("hidden");
+			document.getElementById("custom_featherless_key").value = localsettings.saved_featherless_key;
+			document.getElementById("custom_featherless_endpoint").value = (localsettings.saved_featherless_addr?localsettings.saved_featherless_addr:default_featherless_base);
+			togglefeatherlesspreamble();
+		}
 	}
 
 	var allow_update_kobold_model_display_timestamp = performance.now() + 60000;
@@ -8125,6 +8136,7 @@ Current version indicated by LITEVER below.
 		custom_claude_key = "";
 		custom_palm_key = "";
 		custom_cohere_key = "";
+		custom_featherless_key = "";
 
 		let epchoice = document.getElementById("customapidropdown").value;
 		if(epchoice==0) //ai horde
@@ -8581,6 +8593,53 @@ Current version indicated by LITEVER below.
 				render_gametext();
 			}
 		}
+		else if(epchoice==7) //featherless endpoint
+		{
+			let desired_featherless_key = document.getElementById("custom_featherless_key").value.trim();
+			let desired_featherless_ep = document.getElementById("custom_featherless_endpoint").value.trim();
+
+			if(desired_featherless_ep=="")
+			{
+				desired_featherless_ep = document.getElementById("custom_featherless_endpoint").value = default_featherless_base;
+			}
+
+			if(desired_featherless_ep!="" && desired_featherless_ep.slice(-1)=="/")
+			{
+				desired_featherless_ep = desired_featherless_ep.slice(0, -1);
+			}
+			if (document.getElementById("featherlessaddversion").checked)
+			{
+				if (desired_featherless_ep != "" && desired_featherless_ep.length > 4 && !desired_featherless_ep.slice(-4).toLowerCase().includes("/v")) {
+					desired_featherless_ep = desired_featherless_ep + "/v1";
+				}
+			}
+			if(desired_featherless_key!="" && desired_featherless_ep!="")
+			{
+				hide_popups();
+
+				//good to go
+				custom_featherless_endpoint = desired_featherless_ep;
+				custom_featherless_key = desired_featherless_key;
+				localsettings.saved_featherless_key = custom_featherless_key;
+				localsettings.saved_featherless_addr = custom_featherless_endpoint;
+
+				selected_models = [{ "performance": 100.0, "queued": 0.0, "eta": 0, "name": "Featherless", "count": 1 }];
+				selected_workers = [];
+				if (perfdata == null) {
+					//generate some fake perf data if horde is offline and using custom endpoint
+					perfdata = {
+						"queued_requests": 0,
+						"queued_tokens": 0,
+						"past_minute_tokens": 0,
+						"worker_count": 0
+					};
+					document.body.classList.add("connected");
+					document.getElementById("connectstatus").classList.add("color_offwhite");
+				}
+				document.getElementById("connectstatus").innerHTML = "Featherless Endpoint";
+				render_gametext();
+			}
+		}
 	}
 
 	function display_endpoint_container()
@@ -8878,6 +8937,7 @@ Current version indicated by LITEVER below.
 		custom_claude_key = "";
 		custom_palm_key = "";
 		custom_cohere_key = "";
+		custom_featherless_key = "";
 
 		if (selected_idx_arr.length > 0) {
 			let prep_sel_models = [];
@@ -9124,6 +9184,11 @@ Current version indicated by LITEVER below.
 		if (x && x.type === "password") {
 			x.type = "text";
 		}
+		x = document.getElementById("custom_featherless_key");
+		if(x && x.type === "password")
+		{
+			x.type = "text";
+		}
 		x = document.getElementById("custom_palm_key");
 		if (x && x.type === "password") {
 			x.type = "text";
@@ -9147,6 +9212,10 @@ Current version indicated by LITEVER below.
 			x.type = "password";
 		}
 		x = document.getElementById("custom_cohere_key");
+		if (x && x.type === "text") {
+			x.type = "password";
+		}
+		x = document.getElementById("custom_featherless_key");
 		if (x && x.type === "text") {
 			x.type = "password";
 		}
@@ -16944,6 +17013,7 @@ Current version indicated by LITEVER below.
 				<option value="4">Claude By Anthropic API</option>
 				<option value="5">PaLM/Gemini By Google API</option>
 				<option value="6">Cohere API</option>
+				<option value="7">FeatherlessAI API</option>
 			</select>
 			</div>
 
@@ -17142,9 +17212,79 @@ Current version indicated by LITEVER below.
 					<textarea class="form-control" id="cohere_preamble" rows="3" style="resize: vertical; line-height:1.1; padding:4px; display:inline; width: 100%" type="text" placeholder="(Enter Preamble)" value=""></textarea>
 				</span>
 			</div>
-			<div class="popupfooter">
-				<button type="button" class="btn btn-primary" onclick="connect_custom_endpoint()">Ok</button>
-				<button type="button" class="btn btn-primary" onclick="dismiss_endpoint_container()">Cancel</button>
+
+			<div id="featherlesscustom" class="aidgpopuplistheader anotelabel hidden">
+				<span id="oaidesc">
+					Entering your OpenAI API key will allow you to use KoboldAI Lite with their API.<br><br>
+					Note that KoboldAI Lite takes no responsibility for your usage or consequences of this feature. Your API key is used directly with the OpenAI API and is not transmitted to us.<br>Only Temperature, Top-P and Repetition Penalty samplers are used.<br><br>
+					<span class="color_green" style="font-weight: bold;">Please input OpenAI API URL and Key.</span><br><br>
+					</span>
+					<span id="openrouterdesc" class="hidden">
+					Entering your OpenRouter API key will allow you to use KoboldAI Lite with their API.<br><br>
+					Note that KoboldAI Lite takes no responsibility for your usage or consequences of this feature. Your API key is used directly with the OpenRouter API and is not transmitted to us.<br>Only Temperature, Top-P and Repetition Penalty samplers are used.<br><br>
+					<span class="color_green" style="font-weight: bold;">Please input OpenRouter Key.</span><br><br>
+					</span>
+	
+					<input class="form-control" type="text" id="custom_oai_endpoint" placeholder="OpenAI API URL" value="">
+					<input class="form-control" type="password" id="custom_oai_key" placeholder="OpenAI API Key (Required)" value="" onfocus="focus_api_keys()" onblur="blur_api_keys()"><br>
+					Model Choice:<br>
+					<select style="padding:4px;display:inline;width:calc(100% - 220px)" class="form-control" id="custom_oai_model" onchange="oai_model_change(true)">
+						
+						<option style="display:none;" id="custom_oai_model_option" value="custom">[Custom]</option>
+					</select>
+					<select style="padding:4px;display:inline;width:calc(100% - 220px)" class="form-control hidden" id="custom_openrouter_model" onchange="oai_model_change(true)">
+						<option value="openai/gpt-3.5-turbo">openai/gpt-3.5-turbo</option>
+						<option value="openai/gpt-4">openai/gpt-4</option>
+						<option value="openai/gpt-3.5-turbo-instruct">openai/gpt-3.5-turbo-instruct</option>
+						<option value="mistralai/mistral-7b-instruct" selected="selected">mistralai/mistral-7b-instruct</option>
+						<option value="gryphe/mythomax-l2-13b">gryphe/mythomax-l2-13b</option>
+						<option value="huggingfaceh4/zephyr-7b-beta">huggingfaceh4/zephyr-7b-beta</option>
+						<option value="anthropic/claude-2">anthropic/claude-2</option>
+						<option style="display:none;" id="custom_openrouter_model_option" value="custom">[Custom]</option>
+					</select>
+					<button type="button" class="btn btn-primary" style="display:inline;width:105px;" id="oaifetchlist" onclick="oai_fetch_models()">Fetch List</button>
+					<button type="button" class="btn btn-primary" style="display:inline;width:105px;" id="oaiusecustom" onclick="select_custom_oai_model()">Use Custom</button>
+					<input type="checkbox" id="oaiaddversion" onchange="" checked>
+					<div class="box-label" title="Add endpoint version">Add Endpoint Version</div>
+					<input type="checkbox" id="useoaichatcompl" onchange="toggleoaichatcompl()">
+					<div class="box-label" id="useoaichatcompllabel">Use ChatCompletions API</div>
+	
+					<span id="useoaichatcomplbox" class="hidden" onload="toggleoaichatcompl();">
+						<br>
+						Main Message Role:
+						<select class="form-control" style="height: 25px; font-size:12px; padding:4px;display:inline;width:100px" id="oairoledropdown">
+							<option value="0" selected>User</option>
+							<option value="1">Assistant</option>
+							<option value="2">System</option>
+						</select>
+						<input type="checkbox" id="jailbreakprompt" onchange="togglejailbreak()">
+						<div class="box-label" title="Adds extra text at the start to improve AI response">Add Prefix</div>
+						<input type="checkbox" id="jailbreakprompt2" onchange="togglejailbreak2()">
+						<div class="box-label" title="Adds extra text to the end to improve AI response">Add Postfix</div>
+	
+						<div style="display:flex" id="oaijailbreakpromptblock1">
+						<select class="form-control" style="height: 25px; font-size:12px; padding:4px;display:inline;width:100px" id="jailbreakprompttextrole">
+							<option value="0">User</option>
+							<option value="1">Assistant</option>
+							<option value="2" selected>System</option>
+						</select>
+						<textarea class="form-control" rows="3" style="resize: vertical; line-height:1.1; padding:4px; display:inline; width: 100%" type="text" id="jailbreakprompttext" placeholder="(Enter System Prefix)"
+						value="" onload="togglejailbreak();"></textarea>
+						</div>
+	
+						<div style="display:flex" id="oaijailbreakpromptblock2">
+						<select class="form-control" style="height: 25px; font-size:12px; padding:4px;display:inline;width:100px" id="jailbreakprompttext2role">
+							<option value="0">User</option>
+							<option value="1" selected>Assistant</option>
+							<option value="2">System</option>
+						</select>
+						<textarea class="form-control" rows="3" style="resize: vertical; line-height:1.1; padding:4px;  display:inline; width: 100%;" type="text" id="jailbreakprompttext2" placeholder="(Enter Assistant Postfix)"
+						value="" onload="togglejailbreak2();"></textarea>
+						</div>
+	
+	
+					</span>
+	
 			</div>
 		</div>
 	</div>
