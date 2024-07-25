@@ -17229,7 +17229,14 @@ Current version indicated by LITEVER below.
 					<input class="form-control" type="password" id="custom_oai_key" placeholder="OpenAI API Key (Required)" value="" onfocus="focus_api_keys()" onblur="blur_api_keys()"><br>
 					Model Choice:<br>
 					<select style="padding:4px;display:inline;width:calc(100% - 220px)" class="form-control" id="custom_oai_model" onchange="oai_model_change(true)">
-						
+						<option value="gpt-3.5-turbo-instruct" selected="selected">gpt-3.5-turbo-instruct</option>
+						<option value="davinci-002">davinci-002</option>
+						<option value="gpt-3.5-turbo">gpt-3.5-turbo</option>
+						<option value="gpt-3.5-turbo-16k">gpt-3.5-turbo-16k</option>
+						<option value="gpt-4">gpt-4</option>
+						<option value="gpt-4-turbo">gpt-4-turbo</option>
+						<option value="gpt-4o">gpt-4o</option>
+						<option value="gpt-4-32k">gpt-4-32k</option>
 						<option style="display:none;" id="custom_oai_model_option" value="custom">[Custom]</option>
 					</select>
 					<select style="padding:4px;display:inline;width:calc(100% - 220px)" class="form-control hidden" id="custom_openrouter_model" onchange="oai_model_change(true)">
@@ -17284,7 +17291,11 @@ Current version indicated by LITEVER below.
 	
 	
 					</span>
-	
+			</div>
+
+			<div class="popupfooter">
+				<button type="button" class="btn btn-primary" onclick="connect_custom_endpoint()">Ok</button>
+				<button type="button" class="btn btn-primary" onclick="dismiss_endpoint_container()">Cancel</button>
 			</div>
 		</div>
 	</div>
